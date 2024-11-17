@@ -14,6 +14,10 @@ void main() async {
   // final seeder = QuestionSeeder();
   // await seeder.seedQuestions();
 
+  // Décommenter les lignes ci-dessous pour ajouter des entreprises
+  // final seeder = CompanySeeder();
+  // await seeder.seedCompanies();
+
   runApp(const MyApp());
 }
 
@@ -89,5 +93,32 @@ class QuestionSeeder {
     }
 
     print("All questions added successfully!");
+  }
+}
+
+class CompanySeeder {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> seedCompanies() async {
+    final companies = [
+      {
+        "company": "ASE2I",
+        "title": null,
+        "location": "Entzheim",
+        "compensation": 30000,
+        "date": "2022-07-05T00:00:00.000Z",
+        "level": null,
+        "company_xp": 0,
+        "total_xp": 0,
+        "remote": null
+      },
+      // Ajoutez les autres entreprises ici
+    ];
+
+    for (var company in companies) {
+      await _firestore.collection('companies').add(company);
+    }
+
+    print("Companies added successfully!");
   }
 }
