@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   checkFirebase();
   runApp(const MyApp());
+}
+
+void checkFirebase() {
+  print("Firebase initialisé : ${Firebase.apps.isNotEmpty}");
 }
 
 class MyApp extends StatelessWidget {
@@ -15,19 +21,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Firebase Setup',
-      home: Scaffold(
-        appBar: AppBar(title: const Text("Firebase Intégré")),
-        body: const Center(child: Text("Configuration Firebase réussie !")),
+      title: 'Application Auth & Questions',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      // Écran initial de l'application
+      initialRoute: '/login',
+      // Définition des routes globales
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        // '/questions': (context) => const QuestionScreen(),
+        // '/companies': (context) => const CompanyListScreen(),
+      },
     );
   }
 }
-
-void checkFirebase() {
-  print("Firebase initialisé : ${Firebase.apps.isNotEmpty}");
-}
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
