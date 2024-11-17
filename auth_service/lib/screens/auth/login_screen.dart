@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:auth_service/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -23,9 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Connexion réussie')),
       );
-
-      // Redirection vers un écran suivant (ex : écran des questions)
-      // Remplacez '/questions' par votre route
+      
       Navigator.pushReplacementNamed(context, '/questions');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
