@@ -17,6 +17,12 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 
-dependencies {
-    classpath 'com.google.gms:google-services:4.3.15' // Version récente
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.3.15' // Version récente
+    }
 }
