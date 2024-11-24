@@ -1,44 +1,53 @@
 import 'package:flutter/material.dart';
 import '../question_model.dart';
 
-class MultiChoiceQuestion extends StatelessWidget {
+class MultiChoiceQuestion extends StatefulWidget {
   final Question question;
   final List<String> selectedOptions;
   final Function(List<String>) onOptionsSelected;
 
   const MultiChoiceQuestion({
+    Key? key,
     required this.question,
     required this.selectedOptions,
     required this.onOptionsSelected,
-    Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    List<String> currentSelection = List<String>.from(selectedOptions);
+  _MultiChoiceQuestionState createState() => _MultiChoiceQuestionState();
+}
 
+class _MultiChoiceQuestionState extends State<MultiChoiceQuestion> {
+  List<String> _selectedOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedOptions = widget.selectedOptions;
+  }
+
+  void _toggleOption(String option) {
+    setState(() {
+      if (_selectedOptions.contains(option)) {
+        _selectedOptions.remove(option);
+      } else {
+        _selectedOptions.add(option);
+      }
+    });
+    widget.onOptionsSelected(_selectedOptions);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...question.options!.map((option) {
-          return CheckboxListTile(
-            title: Text(option),
-            value: currentSelection.contains(option),
-            onChanged: (value) {
-              if (value == true) {
-                currentSelection.add(option);
-              } else {
-                currentSelection.remove(option);
-              }
-              onOptionsSelected(currentSelection);
-            },
-          );
-        }).toList(),
-        ElevatedButton(
-          onPressed: () => onOptionsSelected(currentSelection),
-          child: const Text('Valider'),
-        ),
-      ],
+      children: widget.question.options!.map((option) {
+        return CheckboxListTile(
+          title: Text(option),
+          value: _selectedOptions.contains(option),
+          onChanged: (value) => _toggleOption(option),
+        );
+      }).toList(),
     );
   }
 }

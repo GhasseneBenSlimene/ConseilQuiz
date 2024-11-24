@@ -7,49 +7,64 @@ class MatrixTableQuestion extends StatelessWidget {
   final Function(Map<String, String>) onResponsesSubmitted;
 
   const MatrixTableQuestion({
+    Key? key,
     required this.question,
     required this.responses,
     required this.onResponsesSubmitted,
-    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Map<String, String> localResponses = Map<String, String>.from(responses);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...question.matrixOptions!['Critères']!.map((criterion) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                criterion,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: question.matrixOptions!['Échelle']!.map((option) {
-                  return Expanded(
-                    child: RadioListTile<String>(
-                      title: Text(option, style: const TextStyle(fontSize: 10)),
-                      value: option,
-                      groupValue: localResponses[criterion],
-                      onChanged: (value) {
-                        localResponses[criterion] = value!;
-                        onResponsesSubmitted(localResponses);
-                      },
-                    ),
+        Text(
+          question.text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Table(
+          border: TableBorder.all(),
+          columnWidths: const {
+            0: FlexColumnWidth(2),
+            1: FlexColumnWidth(1),
+          },
+          children: [
+            TableRow(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Critères"),
+                ),
+                ...question.scale!.map((scale) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(scale),
                   );
                 }).toList(),
-              ),
-            ],
-          );
-        }).toList(),
-        ElevatedButton(
-          onPressed: () => onResponsesSubmitted(localResponses),
-          child: const Text('Valider'),
+              ],
+            ),
+            ...question.matrixOptions!.entries.map((entry) {
+              return TableRow(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(entry.key),
+                  ),
+                  ...entry.value.map((option) {
+                    return Radio<String>(
+                      value: option,
+                      groupValue: responses[entry.key],
+                      onChanged: (value) {
+                        responses[entry.key] = value!;
+                        onResponsesSubmitted(responses);
+                      },
+                    );
+                  }).toList(),
+                ],
+              );
+            }).toList(),
+          ],
         ),
       ],
     );

@@ -7,10 +7,10 @@ class LikertScaleQuestion extends StatelessWidget {
   final Function(String) onOptionSelected;
 
   const LikertScaleQuestion({
+    Key? key,
     required this.question,
     required this.selectedOption,
     required this.onOptionSelected,
-    Key? key,
   }) : super(key: key);
 
   @override
@@ -18,14 +18,24 @@ class LikertScaleQuestion extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...question.scale!.map((scaleOption) {
-          return RadioListTile<String>(
-            title: Text(scaleOption),
-            value: scaleOption,
-            groupValue: selectedOption,
-            onChanged: (value) => onOptionSelected(value!),
-          );
-        }).toList(),
+        Text(
+          question.text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: question.scale!.map((option) {
+            return Expanded(
+              child: RadioListTile<String>(
+                title: Text(option, textAlign: TextAlign.center),
+                value: option,
+                groupValue: selectedOption,
+                onChanged: (value) => onOptionSelected(value!),
+              ),
+            );
+          }).toList(),
+        ),
       ],
     );
   }

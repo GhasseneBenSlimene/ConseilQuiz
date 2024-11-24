@@ -22,8 +22,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
   String? currentQuestionId = 'q1';
   Question? currentQuestion;
   Map<String, String> userAnswers = {};
+  List<String> questionHistory = []; // Historique des questions
   bool isLoading = true;
-  bool hasError = false; // Indicateur d'erreur
+  bool hasError = false;
 
   @override
   void initState() {
@@ -31,11 +32,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
     _loadQuestion(currentQuestionId!);
   }
 
-  // Charger une question par ID avec gestion des erreurs
+  // Charger une question par ID
   Future<void> _loadQuestion(String questionId) async {
     setState(() {
       isLoading = true;
-      hasError = false; // Réinitialiser l'état d'erreur
+      hasError = false;
     });
 
     try {
@@ -46,31 +47,53 @@ class _QuestionScreenState extends State<QuestionScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print("question_screen: Erreur lors du chargement de la question : $e");
+      print("Erreur lors du chargement de la question : $e");
       setState(() {
         currentQuestion = null;
         currentQuestionId = null;
         isLoading = false;
-        hasError = true; // Définir l'état d'erreur
+        hasError = true;
       });
     }
   }
 
-  // Sauvegarder la réponse utilisateur
+  // Sauvegarder une réponse
   Future<void> _saveAnswer(String answer) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    userAnswers[currentQuestionId!] = answer;
+    setState(() {
+      userAnswers[currentQuestionId!] = answer; // Met à jour localement immédiatement
+    });
 
     await _questionService.saveUserAnswer(user.uid, currentQuestionId!, answer);
+  }
 
-    String? nextQuestionId = currentQuestion?.next?[answer] ?? currentQuestion?.next?['default'];
+  // Charger la question suivante
+  Future<void> _nextQuestion() async {
+    if (!questionHistory.contains(currentQuestionId!)) {
+      questionHistory.add(currentQuestionId!);
+    }
+
+    final nextQuestionId =
+        currentQuestion?.next?[userAnswers[currentQuestionId!] ?? ''] ??
+            currentQuestion?.next?['default'];
 
     if (nextQuestionId != null) {
       await _loadQuestion(nextQuestionId);
     } else {
       Navigator.pushReplacementNamed(context, '/end');
+    }
+  }
+
+  // Charger la question précédente
+  Future<void> _previousQuestion() async {
+    if (questionHistory.isEmpty) return;
+
+    final previousQuestionId = questionHistory.removeLast();
+
+    if (previousQuestionId != null) {
+      await _loadQuestion(previousQuestionId);
     }
   }
 
@@ -81,7 +104,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         return SingleChoiceQuestion(
           question: question,
           selectedOption: userAnswers[question.id],
-          onOptionSelected: _saveAnswer,
+          onOptionSelected: (value) => _saveAnswer(value),
         );
       case 'multi_choice':
         return MultiChoiceQuestion(
@@ -93,7 +116,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
         return LikertScaleQuestion(
           question: question,
           selectedOption: userAnswers[question.id],
-          onOptionSelected: _saveAnswer,
+          onOptionSelected: (value) => _saveAnswer(value),
+        );
+      case 'dropdown':
+        return DropdownQuestion(
+          question: question,
+          selectedOption: userAnswers[question.id],
+          onOptionSelected: (value) => _saveAnswer(value),
         );
       case 'matrix_table':
         return MatrixTableQuestion(
@@ -103,22 +132,27 @@ class _QuestionScreenState extends State<QuestionScreen> {
             responses.entries.map((e) => '${e.key}:${e.value}').join(';'),
           ),
         );
-      case 'dropdown':
-        return DropdownQuestion(
-          question: question,
-          selectedOption: userAnswers[question.id],
-          onOptionSelected: _saveAnswer,
-        );
       default:
         return const Text('Type de question non pris en charge');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Questionnaire'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Déconnexion',
+            onPressed: () async {
+              await _auth.signOut();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -159,6 +193,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           ),
                           const SizedBox(height: 16),
                           _buildQuestion(currentQuestion!),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                onPressed: questionHistory.isEmpty
+                                    ? null
+                                    : _previousQuestion,
+                                child: const Text('Previous'),
+                              ),
+                              ElevatedButton(
+                                onPressed: _nextQuestion,
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
