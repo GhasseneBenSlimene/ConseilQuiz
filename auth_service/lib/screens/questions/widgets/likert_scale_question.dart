@@ -15,6 +15,13 @@ class LikertScaleQuestion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (question.scale == null || question.scale!.isEmpty) {
+      return const Text(
+        "Erreur : Échelle Likert non disponible.",
+        style: TextStyle(color: Colors.red),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -22,16 +29,38 @@ class LikertScaleQuestion extends StatelessWidget {
           question.text,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: question.scale!.map((option) {
-            return Expanded(
-              child: RadioListTile<String>(
-                title: Text(option, textAlign: TextAlign.center),
-                value: option,
-                groupValue: selectedOption,
-                onChanged: (value) => onOptionSelected(value!),
+            final isSelected = selectedOption == option;
+
+            return GestureDetector(
+              onTap: () {
+                onOptionSelected(option);
+              },
+              child: Column(
+                children: [
+                  Text(option),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.blue : Colors.grey[300],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        option,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }).toList(),

@@ -2,40 +2,42 @@ class Question {
   final String id;
   final String text;
   final String type;
-  final List<String>? options;
+  final List<String>? options; // Pour single_choice, multi_choice, dropdown
+  final List<String>? scale; // Pour likert_scale
+  final Map<String, List<String>>? matrixOptions; // Pour matrix_table
   final Map<String, String>? next;
-  final List<String>? scale;
-  final Map<String, List<String>>? matrixOptions;
 
   Question({
     required this.id,
     required this.text,
     required this.type,
     this.options,
-    this.next,
     this.scale,
     this.matrixOptions,
+    this.next,
   });
 
-  // Convertir un document Firestore en Question avec validation
-  factory Question.fromFirestore(String id, Map<String, dynamic> data) {
-    if (!data.containsKey('type') || data['type'] == null) {
-      throw Exception("Type manquant ou null dans les données Firebase.");
-    }
-    if (!data.containsKey('text') || data['text'] == null) {
-      throw Exception("Texte de la question manquant ou null.");
-    }
-
+  factory Question.fromFirestore(id, Map<String, dynamic> data) {
     return Question(
-      id: id,
-      text: data['text'],
-      type: data['type'],
-      options: List<String>.from(data['options'] ?? []),
-      next: Map<String, String>.from(data['next'] ?? {}),
-      scale: List<String>.from(data['scale'] ?? []),
+      id: id as String,
+      text: data['text'] as String,
+      type: data['type'] as String,
+      options: data['options'] != null
+          ? List<String>.from(data['options'])
+          : null,
+      scale: data['scale'] != null
+          ? List<String>.from(data['scale'])
+          : null,
       matrixOptions: data['matrixOptions'] != null
-          ? Map<String, List<String>>.from((data['matrixOptions'] as Map)
-              .map((key, value) => MapEntry(key, List<String>.from(value))))
+          ? (data['matrixOptions'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(
+                key,
+                List<String>.from(value),
+              ),
+            )
+          : null,
+      next: data['next'] != null
+          ? Map<String, String>.from(data['next'])
           : null,
     );
   }

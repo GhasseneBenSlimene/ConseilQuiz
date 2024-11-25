@@ -12,8 +12,8 @@ void main() async {
   checkFirebase();
   
   // Décommenter les lignes ci-dessous pour ajouter des questions
-  final seeder = QuestionSeeder();
-  await seeder.seedQuestions();
+  // final seeder = QuestionSeeder();
+  // await seeder.seedQuestions();
 
   // Décommenter les lignes ci-dessous pour ajouter des entreprises
   // final seeder = CompanySeeder();

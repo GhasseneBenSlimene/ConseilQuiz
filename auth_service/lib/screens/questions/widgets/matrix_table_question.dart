@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../question_model.dart';
 
-class MatrixTableQuestion extends StatelessWidget {
+class MatrixTableQuestion extends StatefulWidget {
   final Question question;
-  final Map<String, String> responses;
+  final Map<String, String> responses; // Réponses sauvegardées
   final Function(Map<String, String>) onResponsesSubmitted;
 
   const MatrixTableQuestion({
@@ -14,50 +14,72 @@ class MatrixTableQuestion extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _MatrixTableQuestionState createState() => _MatrixTableQuestionState();
+}
+
+class _MatrixTableQuestionState extends State<MatrixTableQuestion> {
+  late Map<String, String> _responses;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialiser les réponses avec celles existantes (si disponibles)
+    _responses = Map<String, String>.from(widget.responses);
+  }
+
+  void _updateResponse(String critere, String value) {
+    setState(() {
+      _responses[critere] = value;
+    });
+    widget.onResponsesSubmitted(_responses); // Sauvegarder immédiatement
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final matrixOptions = widget.question.matrixOptions!;
+    final criteres = matrixOptions['Critères']!;
+    final echelle = matrixOptions['Échelle']!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          question.text,
+          widget.question.text,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Table(
           border: TableBorder.all(),
-          columnWidths: const {
+          columnWidths: {
             0: FlexColumnWidth(2),
-            1: FlexColumnWidth(1),
+            for (int i = 1; i <= echelle.length; i++) i: FlexColumnWidth(1),
           },
           children: [
             TableRow(
               children: [
                 const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text("Critères"),
+                  child: Text('Critères', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
-                ...question.scale!.map((scale) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(scale),
-                  );
-                }).toList(),
+                ...echelle.map((e) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(e, textAlign: TextAlign.center),
+                    )),
               ],
             ),
-            ...question.matrixOptions!.entries.map((entry) {
+            ...criteres.map((critere) {
               return TableRow(
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(entry.key),
+                    child: Text(critere),
                   ),
-                  ...entry.value.map((option) {
+                  ...echelle.map((option) {
                     return Radio<String>(
                       value: option,
-                      groupValue: responses[entry.key],
+                      groupValue: _responses[critere], // Charger la réponse sauvegardée
                       onChanged: (value) {
-                        responses[entry.key] = value!;
-                        onResponsesSubmitted(responses);
+                        _updateResponse(critere, value!);
                       },
                     );
                   }).toList(),

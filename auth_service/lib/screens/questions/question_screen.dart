@@ -98,45 +98,54 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   // Construire une question en fonction de son type
-  Widget _buildQuestion(Question question) {
-    switch (question.type) {
-      case 'single_choice':
-        return SingleChoiceQuestion(
-          question: question,
-          selectedOption: userAnswers[question.id],
-          onOptionSelected: (value) => _saveAnswer(value),
-        );
-      case 'multi_choice':
-        return MultiChoiceQuestion(
-          question: question,
-          selectedOptions: userAnswers[question.id]?.split(',') ?? [],
-          onOptionsSelected: (options) => _saveAnswer(options.join(',')),
-        );
-      case 'likert_scale':
-        return LikertScaleQuestion(
-          question: question,
-          selectedOption: userAnswers[question.id],
-          onOptionSelected: (value) => _saveAnswer(value),
-        );
-      case 'dropdown':
-        return DropdownQuestion(
-          question: question,
-          selectedOption: userAnswers[question.id],
-          onOptionSelected: (value) => _saveAnswer(value),
-        );
-      case 'matrix_table':
-        return MatrixTableQuestion(
-          question: question,
-          responses: {},
-          onResponsesSubmitted: (responses) => _saveAnswer(
-            responses.entries.map((e) => '${e.key}:${e.value}').join(';'),
-          ),
-        );
-      default:
-        return const Text('Type de question non pris en charge');
-    }
+Widget _buildQuestion(Question question) {
+  switch (question.type) {
+    case 'single_choice':
+      return SingleChoiceQuestion(
+        question: question,
+        selectedOption: userAnswers[question.id],
+        onOptionSelected: (value) => _saveAnswer(value),
+      );
+    case 'multi_choice':
+      return MultiChoiceQuestion(
+        question: question,
+        selectedOptions: userAnswers[question.id]?.split(',') ?? [],
+        onOptionsSelected: (options) => _saveAnswer(options.join(',')),
+      );
+    case 'likert_scale':
+      return LikertScaleQuestion(
+        question: question,
+        selectedOption: userAnswers[question.id],
+        onOptionSelected: (value) => _saveAnswer(value),
+      );
+    case 'dropdown':
+      return DropdownQuestion(
+        question: question,
+        selectedOption: userAnswers[question.id],
+        onOptionSelected: (value) => _saveAnswer(value),
+      );
+    case 'matrix_table':
+      return MatrixTableQuestion(
+        question: question,
+        responses: userAnswers[question.id] != null
+            ? Map.fromEntries(
+                (userAnswers[question.id]!.split(';')).map((entry) {
+                  final parts = entry.split(':');
+                  return MapEntry(parts[0], parts[1]);
+                }),
+              )
+            : {}, // Si pas de réponse, initialiser un map vide
+        onResponsesSubmitted: (responses) {
+          final formattedResponse = responses.entries
+              .map((entry) => '${entry.key}:${entry.value}')
+              .join(';');
+          _saveAnswer(formattedResponse);
+        },
+      );
+    default:
+      return const Text('Type de question non pris en charge');
   }
-
+}
 
   @override
   Widget build(BuildContext context) {
@@ -201,11 +210,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                 onPressed: questionHistory.isEmpty
                                     ? null
                                     : _previousQuestion,
-                                child: const Text('Previous'),
+                                child: const Text('Précédent'),
                               ),
                               ElevatedButton(
                                 onPressed: _nextQuestion,
-                                child: const Text('Next'),
+                                child: const Text('Suivant'),
                               ),
                             ],
                           ),
