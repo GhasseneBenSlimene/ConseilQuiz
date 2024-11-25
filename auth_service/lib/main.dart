@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+import 'screens/companies/company_list_screen.dart';
 import 'screens/questions/question_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -44,7 +45,9 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/questions': (context) => const QuestionScreen(),
-        // '/companies': (context) => const CompanyListScreen(),
+        '/companies': (context) => CompanyListScreen(
+          userAnswers: ModalRoute.of(context)?.settings.arguments as Map<String, String>,
+        ),
       },
     );
   }
