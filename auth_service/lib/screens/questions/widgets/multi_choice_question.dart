@@ -39,15 +39,61 @@ class _MultiChoiceQuestionState extends State<MultiChoiceQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: widget.question.options!.map((option) {
-        return CheckboxListTile(
-          title: Text(option),
-          value: _selectedOptions.contains(option),
-          onChanged: (value) => _toggleOption(option),
-        );
-      }).toList(),
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Text(
+              widget.question.text!,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          ...widget.question.options!.map((option) {
+            return Card(
+              elevation: 2,
+              margin: const EdgeInsets.symmetric(vertical: 6.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: CheckboxListTile(
+                title: Text(
+                  option,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+                value: _selectedOptions.contains(option),
+                onChanged: (value) => _toggleOption(option),
+                activeColor: Colors.blueAccent,
+                checkColor: Colors.white,
+                controlAffinity: ListTileControlAffinity.leading,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            );
+          }).toList(),
+        ],
+      ),
     );
   }
 }
