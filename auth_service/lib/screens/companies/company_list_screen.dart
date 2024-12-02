@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'company_service.dart';
+import './company_service.dart';
 
 class CompanyListScreen extends StatefulWidget {
   final Map<String, String> userAnswers;
@@ -15,34 +15,33 @@ class CompanyListScreen extends StatefulWidget {
 class _CompanyListScreenState extends State<CompanyListScreen> {
   final CompanyService _companyService = CompanyService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> companies = [];
+  List<String> wishlist = []; // Entreprises favorites
   bool isLoading = true;
-  List<String> wishlist = []; // Liste des entreprises favoris
 
   @override
   void initState() {
     super.initState();
-    loadCompanies();
-    loadWishlist();
+    loadRecommendations();
   }
 
-  Future<void> loadCompanies() async {
-    final sortedCompanies = await _companyService.getSortedCompanies(widget.userAnswers);
-    setState(() {
-      companies = sortedCompanies;
-      isLoading = false;
-    });
-  }
+  Future<void> loadRecommendations() async {
+    try {
+      final sortedCompanies = await _companyService.getSortedCompanies(widget.userAnswers);
+      final user = _auth.currentUser;
 
-  Future<void> loadWishlist() async {
-    final user = _auth.currentUser;
-    if (user == null) return;
-
-    final wishlistDoc = await _firestore.collection('wishlist').doc(user.uid).get();
-    if (wishlistDoc.exists) {
+      if (user != null) {
+        final wishlistDoc = await FirebaseFirestore.instance.collection('wishlist').doc(user.uid).get();
+        setState(() {
+          companies = sortedCompanies;
+          wishlist = wishlistDoc.exists ? List<String>.from(wishlistDoc['companyIds'] ?? []) : [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Erreur lors du chargement des recommandations : $e");
       setState(() {
-        wishlist = List<String>.from(wishlistDoc['companyIds'] ?? []);
+        isLoading = false;
       });
     }
   }
@@ -56,93 +55,111 @@ class _CompanyListScreenState extends State<CompanyListScreen> {
         wishlist.remove(companyId);
       } else {
         wishlist.add(companyId);
+
+        // Déplacer l'entreprise en haut de la liste
+        final company = companies.firstWhere((c) => c['company'] == companyId, orElse: () => {});
+        if (company.isNotEmpty) {
+          companies.remove(company);
+          companies.insert(0, company);
+        }
       }
     });
 
-    await _firestore.collection('wishlist').doc(user.uid).set({
+    await FirebaseFirestore.instance.collection('wishlist').doc(user.uid).set({
       'companyIds': wishlist,
     });
   }
 
   void showCompanyDetails(Map<String, dynamic> company) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final isFavorite = wishlist.contains(company['company']); // Vérifier si c'est dans les favoris
-        return AlertDialog(
-          title: Text(
-            company['company'] ?? 'Détails de l\'entreprise',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow("Titre", company['title'] ?? 'Non spécifié', isBold: true),
-                _buildDetailRow("Localisation", company['location'] ?? 'Non spécifiée'),
-                _buildDetailRow("Salaire", "${company['compensation'] ?? 'Non spécifié'} €"),
-                _buildDetailRow("Date de publication", company['date']?.split('T')[0] ?? 'Non spécifiée'),
-                _buildDetailRow("Niveau d'expérience requis", "${company['company_xp'] ?? 'Non spécifié'} ans"),
-                _buildDetailRow("Expérience totale recommandée", "${company['total_xp'] ?? 'Non spécifié'} ans"),
-                _buildDetailRow("Télétravail", company['remote'] ?? 'Non spécifié'),
-              ],
+    try {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          final isFavorite = wishlist.contains(company['company']);
+          return AlertDialog(
+            title: Text(
+              company['company'] ?? 'Détails de l\'entreprise',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Fermer', style: TextStyle(color: Colors.blueAccent)),
-            ),
-            TextButton(
-              onPressed: () {
-                toggleWishlist(company['company']);
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
-                style: const TextStyle(color: Colors.redAccent),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailRow("Titre", company['title']),
+                  _buildDetailRow("Localisation", company['location']),
+                  _buildDetailRow("Salaire", company['compensation']),
+                  _buildDetailRow("Date de publication", company['date']?.split('T')[0]),
+                  _buildDetailRow("Niveau d'expérience requis", company['company_xp']),
+                  _buildDetailRow("Expérience totale recommandée", company['total_xp']),
+                  _buildDetailRow("Télétravail", company['remote']),
+                ],
               ),
             ),
-          ],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        );
-      },
-    );
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Fermer', style: TextStyle(color: Colors.blueAccent)),
+              ),
+              TextButton(
+                onPressed: () {
+                  toggleWishlist(company['company']);
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      print("Erreur lors de l'affichage des détails : $e");
+    }
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "$label : ",
-            style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              fontSize: 16,
-            ),
+Widget _buildDetailRow(String label, dynamic value, {bool isBold = false}) {
+  final displayValue = value is String
+      ? value
+      : value != null
+          ? value.toString()
+          : 'Non spécifié';
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "$label : ",
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            fontSize: 16,
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(color: Colors.black54, fontSize: 16),
-            ),
+        ),
+        Expanded(
+          child: Text(
+            displayValue,
+            style: const TextStyle(color: Colors.black54, fontSize: 16),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Entreprises suggérées'),
+        title: const Text('Recommandations d\'entreprises'),
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(

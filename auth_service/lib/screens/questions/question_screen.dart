@@ -15,24 +15,42 @@ class QuestionScreen extends StatefulWidget {
   _QuestionScreenState createState() => _QuestionScreenState();
 }
 
-class _QuestionScreenState extends State<QuestionScreen> {
+class _QuestionScreenState extends State<QuestionScreen>
+    with SingleTickerProviderStateMixin {
   final QuestionService _questionService = QuestionService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String? currentQuestionId = 'q1';
   Question? currentQuestion;
   Map<String, String> userAnswers = {};
-  List<String> questionHistory = []; // Historique des questions
+  List<String> questionHistory = [];
   bool isLoading = true;
   bool hasError = false;
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  bool _isAnimationInitialized = false;
 
   @override
   void initState() {
     super.initState();
+
+    _animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _isAnimationInitialized = true;
+      });
+    });
+
     _loadQuestion(currentQuestionId!);
   }
 
-  // Charger une question par ID
   Future<void> _loadQuestion(String questionId) async {
     setState(() {
       isLoading = true;
@@ -46,8 +64,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         currentQuestionId = questionId;
         isLoading = false;
       });
+      _animationController.forward(from: 0); // Trigger fade animation
     } catch (e) {
-      print("Erreur lors du chargement de la question : $e");
       setState(() {
         currentQuestion = null;
         currentQuestionId = null;
@@ -57,27 +75,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // Sauvegarder une réponse
   Future<void> _saveAnswer(String answer) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
     setState(() {
-      userAnswers[currentQuestionId!] = answer; // Met à jour localement immédiatement
+      userAnswers[currentQuestionId!] = answer;
     });
 
     await _questionService.saveUserAnswer(user.uid, currentQuestionId!, answer);
   }
 
-  // Charger la question suivante
   Future<void> _nextQuestion() async {
     if (!questionHistory.contains(currentQuestionId!)) {
       questionHistory.add(currentQuestionId!);
     }
 
     final nextQuestionId =
-        currentQuestion?.next?[userAnswers[currentQuestionId!] ?? ''] ??
-            currentQuestion?.next?['default'];
+        currentQuestion?.next?[userAnswers[currentQuestionId!] ?? ''] ?? currentQuestion?.next?['default'];
 
     if (nextQuestionId != null) {
       await _loadQuestion(nextQuestionId);
@@ -86,7 +101,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // Charger la question précédente
   Future<void> _previousQuestion() async {
     if (questionHistory.isEmpty) return;
 
@@ -97,7 +111,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // Construire une question en fonction de son type
   Widget _buildQuestion(Question question) {
     switch (question.type) {
       case 'single_choice':
@@ -134,7 +147,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     return MapEntry(parts[0], parts[1]);
                   }),
                 )
-              : {}, // Si pas de réponse, initialiser un map vide
+              : {},
           onResponsesSubmitted: (responses) {
             final formattedResponse = responses.entries
                 .map((entry) => '${entry.key}:${entry.value}')
@@ -147,7 +160,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  // Vérifier si c'est la dernière question
   bool isLastQuestion(Question? question) {
     if (question == null) return false;
     return question.next != null && question.next!['default'] == "end";
@@ -155,9 +167,26 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isAnimationInitialized) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Questionnaire'),
+        title: const Text(
+          'Interactive Questionnaire',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.lightBlueAccent,
+        elevation: 10,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -169,74 +198,132 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : hasError
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Erreur : Impossible de charger la question.',
-                        style: TextStyle(color: Colors.red, fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => _loadQuestion(currentQuestionId ?? 'q1'),
-                        child: const Text('Réessayer'),
-                      ),
-                    ],
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              colors: [Colors.white, Colors.lightBlueAccent],
+              center: Alignment.topCenter,
+              radius: 2,
+            ),
+          ),
+          child: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.lightBlue,
                   ),
                 )
-              : currentQuestion == null
-                  ? const Center(
-                      child: Text(
-                        'Erreur : Question non disponible.',
-                        style: TextStyle(color: Colors.red),
+              : hasError
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Erreur : Impossible de charger la question.',
+                            style: TextStyle(color: Colors.red, fontSize: 18),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.lightBlueAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () => _loadQuestion(currentQuestionId ?? 'q1'),
+                            child: const Text('Réessayer'),
+                          ),
+                        ],
                       ),
                     )
                   : Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            currentQuestion!.text,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 16),
-                          _buildQuestion(currentQuestion!),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Card(
+                        elevation: 10,
+                        shadowColor: Colors.lightBlueAccent.withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              ElevatedButton(
-                                onPressed: questionHistory.isEmpty
-                                    ? null
-                                    : _previousQuestion,
-                                child: const Text('Précédent'),
+                              Text(
+                                currentQuestion!.text,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.lightBlue,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  if (isLastQuestion(currentQuestion)) {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/companies',
-                                      arguments: userAnswers, // Passer les réponses utilisateur
-                                    );
-                                  } else {
-                                    _nextQuestion(); // Naviguer à la question suivante
-                                  }
-                                },
-                                child: Text(isLastQuestion(currentQuestion) ? 'Voir les recommandations' : 'Suivant'),
+                              const SizedBox(height: 16),
+                              _buildQuestion(currentQuestion!),
+                              const SizedBox(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.lightBlueAccent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 12),
+                                    ),
+                                    onPressed: questionHistory.isEmpty
+                                        ? null
+                                        : _previousQuestion,
+                                    child: const Text(
+                                      'Précédent',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.lightBlueAccent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 12),
+                                    ),
+                                    onPressed: () {
+                                      if (isLastQuestion(currentQuestion)) {
+                                        Navigator.pushReplacementNamed(
+                                          context,
+                                          '/companies',
+                                          arguments: userAnswers,
+                                        );
+                                      } else {
+                                        _nextQuestion();
+                                      }
+                                    },
+                                    child: Text(
+                                      isLastQuestion(currentQuestion)
+                                          ? 'Voir les recommandations'
+                                          : 'Suivant',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
+        ),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }

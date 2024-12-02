@@ -24,17 +24,31 @@ class CompanyService {
   int _calculateScore(Map<String, dynamic> company, Map<String, String> userAnswers) {
     int score = 0;
 
-    // Exemple : Ajouter des points en fonction de la localisation
-    if (userAnswers['location'] == company['location']) {
+    // Ajouter des points en fonction de la localisation
+    if (userAnswers['q5'] == company['location']) {
       score += 10;
     }
 
-    // Exemple : Ajouter des points en fonction de l'expérience totale requise
-    if (company['total_xp'] != null && int.parse(userAnswers['experience'] ?? '0') >= company['total_xp']) {
-      score += 5;
+    // Ajouter des points en fonction de l'expérience totale requise
+    if (company['total_xp'] != null) {
+      int userXp = _parseExperience(userAnswers['q11'] ?? '0-0 ans');
+      if (userXp >= company['total_xp']) {
+        score += 5;
+      }
     }
-
+    print("scoreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:$score");
     // Ajoutez plus de conditions ici en fonction des besoins
     return score;
+  }
+
+  // Méthode pour analyser l'expérience utilisateur
+  int _parseExperience(String experience) {
+    final match = RegExp(r'(\d+)-(\d+) ans').firstMatch(experience);
+    if (match != null) {
+      int minXp = int.parse(match.group(1)!);
+      int maxXp = int.parse(match.group(2)!);
+      return (minXp + maxXp) ~/ 2; // Retourner la moyenne de l'expérience
+    }
+    return 0;
   }
 }
