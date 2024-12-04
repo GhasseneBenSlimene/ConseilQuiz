@@ -16,7 +16,7 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen>
-    with SingleTickerProviderStateMixin {
+  with SingleTickerProviderStateMixin {
   final QuestionService _questionService = QuestionService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -35,6 +35,7 @@ class _QuestionScreenState extends State<QuestionScreen>
   void initState() {
     super.initState();
 
+    // Initialize animation controller and fade animation
     _animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 1));
     _fadeAnimation = CurvedAnimation(
@@ -42,15 +43,18 @@ class _QuestionScreenState extends State<QuestionScreen>
       curve: Curves.easeInOut,
     );
 
+    // Set animation initialized flag after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _isAnimationInitialized = true;
       });
     });
 
+    // Load the initial question
     _loadQuestion(currentQuestionId!);
   }
 
+  // Load a question by its ID
   Future<void> _loadQuestion(String questionId) async {
     setState(() {
       isLoading = true;
@@ -75,6 +79,7 @@ class _QuestionScreenState extends State<QuestionScreen>
     }
   }
 
+  // Save the user's answer to the current question
   Future<void> _saveAnswer(String answer) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -86,6 +91,7 @@ class _QuestionScreenState extends State<QuestionScreen>
     await _questionService.saveUserAnswer(user.uid, currentQuestionId!, answer);
   }
 
+  // Load the next question based on the user's answer
   Future<void> _nextQuestion() async {
     if (!questionHistory.contains(currentQuestionId!)) {
       questionHistory.add(currentQuestionId!);
@@ -101,6 +107,7 @@ class _QuestionScreenState extends State<QuestionScreen>
     }
   }
 
+  // Load the previous question from the history
   Future<void> _previousQuestion() async {
     if (questionHistory.isEmpty) return;
 
@@ -111,6 +118,7 @@ class _QuestionScreenState extends State<QuestionScreen>
     }
   }
 
+  // Build the appropriate widget for the current question type
   Widget _buildQuestion(Question question) {
     switch (question.type) {
       case 'single_choice':
@@ -160,6 +168,7 @@ class _QuestionScreenState extends State<QuestionScreen>
     }
   }
 
+  // Check if the current question is the last one
   bool isLastQuestion(Question? question) {
     if (question == null) return false;
     return question.next != null && question.next!['default'] == "end";
