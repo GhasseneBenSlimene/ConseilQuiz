@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // Écran initial de l'application
-      initialRoute: '/login',
+      initialRoute: '/users',
       // Définition des routes globales
       routes: {
         '/login': (context) => const LoginScreen(),
