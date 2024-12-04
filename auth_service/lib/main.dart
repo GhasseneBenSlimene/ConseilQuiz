@@ -5,6 +5,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/companies/company_list_screen.dart';
 import 'screens/questions/question_screen.dart';
+import 'screens/user_answers/user_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // Écran initial de l'application
-      initialRoute: '/login',
+      initialRoute: '/users',
       // Définition des routes globales
       routes: {
         '/login': (context) => const LoginScreen(),
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
         '/companies': (context) => CompanyListScreen(
           userAnswers: ModalRoute.of(context)?.settings.arguments as Map<String, String>,
         ),
+        '/users': (context) => const UserListScreen()
       },
     );
   }
