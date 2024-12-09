@@ -5,6 +5,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/companies/company_list_screen.dart';
 import 'screens/questions/question_screen.dart';
+import 'screens/user_answers/user_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
@@ -46,9 +47,9 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/questions': (context) => const QuestionScreen(),
         '/companies': (context) => CompanyListScreen(
-              userAnswers: ModalRoute.of(context)?.settings.arguments
-                  as Map<String, String>,
-            ),
+          userAnswers: ModalRoute.of(context)?.settings.arguments as Map<String, String>,
+        ),
+        '/users': (context) => const UserListScreen()
       },
     );
   }
