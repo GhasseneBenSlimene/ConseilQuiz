@@ -159,9 +159,35 @@ Widget _buildDetailRow(String label, dynamic value, {bool isBold = false}) {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recommandations d\'entreprises'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text('Recommandations d\'entreprises',style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.lightBlueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              Navigator.pushNamed(context, '/users');
+            },
+            tooltip: 'Voir la liste des utilisateurs',
+            color: Colors.white,
+            iconSize: 30,
+            splashColor: Colors.lightBlueAccent,
+            splashRadius: 25,
+          ),
           IconButton(
             onPressed: () async {
               await _auth.signOut();

@@ -98,6 +98,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              const Text(
+                'Note: Vos réponses seront visibles pour les autres utilisateurs car il s\'agit d\'un questionnaire ouvert.',
+                style: TextStyle(color: Colors.orangeAccent, fontSize: 14),
+              ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,

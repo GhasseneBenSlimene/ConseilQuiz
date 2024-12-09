@@ -209,6 +209,20 @@ class _QuestionScreenState extends State<QuestionScreen>
             bottom: Radius.circular(30),
           ),
         ),
+         actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              Navigator.pushNamed(context, '/users');
+            },
+            tooltip: 'Voir la liste des utilisateurs',
+            color: Colors.white,
+            iconSize: 30,
+            splashColor: Colors.lightBlueAccent,
+            splashRadius: 25,
+          ),
+        ],
+      
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
