@@ -13,6 +13,18 @@
       <change beforePath="$PROJECT_DIR$/auth_service/lib/screens/questions/question_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/lib/screens/questions/question_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/auth_service/lib/screens/user_answers/user_answers_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/lib/screens/user_answers/user_answers_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/auth_service/lib/screens/user_answers/user_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/lib/screens/user_answers/user_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/android/app/google-services.json" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/android/app/google-services.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/lib/screens/auth/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/lib/screens/auth/login_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/lib/screens/auth/register_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/lib/screens/auth/register_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/lib/services/auth_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/lib/services/auth_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_service/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/auth_service/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,12 +54,15 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
 <<<<<<< HEAD
+<<<<<<< HEAD
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;taha&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/benki/OneDrive/Documents/projet_questio/ConseilQuiz&quot;,
 =======
+=======
+>>>>>>> d139dc58cc2eb6dbe869ed9b07bcc826c9f0f1cf
     &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
@@ -58,7 +73,10 @@
     &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+<<<<<<< HEAD
 >>>>>>> d139dc5 (Google Sign-In)
+=======
+>>>>>>> d139dc58cc2eb6dbe869ed9b07bcc826c9f0f1cf
     &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;
   }
 }</component>
