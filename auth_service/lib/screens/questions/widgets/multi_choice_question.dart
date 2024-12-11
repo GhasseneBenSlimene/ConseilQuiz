@@ -55,17 +55,6 @@ class _MultiChoiceQuestionState extends State<MultiChoiceQuestion> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Text(
-              widget.question.text!,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-          ),
           ...widget.question.options!.map((option) {
             return Card(
               elevation: 2,

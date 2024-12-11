@@ -43,10 +43,6 @@ class _MatrixTableQuestionState extends State<MatrixTableQuestion> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.question.text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
         const SizedBox(height: 8),
         Table(
           border: TableBorder.all(),

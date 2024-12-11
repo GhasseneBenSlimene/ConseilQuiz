@@ -18,10 +18,6 @@ class DropdownQuestion extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          question.text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
         const SizedBox(height: 8),
         DropdownButton<String>(
           isExpanded: true,
