@@ -98,7 +98,8 @@ class _QuestionScreenState extends State<QuestionScreen>
       questionHistory.add(currentQuestionId!);
     }
 
-    final nextQuestionId = currentQuestion?.next?[userAnswers[currentQuestionId!] ?? 'default'];
+    final nextQuestionId =
+      currentQuestion?.next?[userAnswers[currentQuestionId!] ?? ''] ?? currentQuestion?.next?['default'];
 
     if (nextQuestionId != null) {
       await _loadQuestion(nextQuestionId);
