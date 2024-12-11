@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:auth_service/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -15,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
 
   Future<void> _register() async {
     try {
@@ -37,6 +39,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Rediriger vers la page de connexion
       Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur : ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final User? user = await _authService.signInWithGoogle();
+      if (user != null) {
+        // Enregistrer les informations de l'utilisateur dans Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': user.displayName,
+          'email': user.email,
+          'createdAt': DateTime.now(),
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connexion réussie')),
+        );
+
+        // Rediriger vers la page de connexion
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur : ${e.toString()}')),
@@ -145,6 +172,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: const Text(
                     "S'inscrire",
                     style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _signInWithGoogle,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text(
+                    "Se connecter avec Google",
+                    style: TextStyle(fontSize: 16, color: Colors.blueAccent),
                   ),
                 ),
               ),
