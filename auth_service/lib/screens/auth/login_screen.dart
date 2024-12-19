@@ -152,12 +152,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text(
-                    "Se connecter avec Google",
-                    style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.g_mobiledata, // Google's Material Icon (use as placeholder or actual asset)
+                        color: Colors.blueAccent,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Se connecter avec Google",
+                        style: TextStyle(fontSize: 16, color: Colors.blueAccent),
+                      ),
+                    ],
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
